@@ -1,0 +1,7 @@
+FROM 192.168.1.201:5000/uploadapp:1.0.1
+
+COPY ./applications/uploader/jdk1.8.0_111 /opt/jdk1.8.0_111
+COPY ./applications/uploader/profile /etc/profile
+COPY ./applications/uploader/hosts /etc/hosts
+
+CMD ["node", "consumer_es_fix.js"]

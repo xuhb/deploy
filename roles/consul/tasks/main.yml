@@ -1,0 +1,6 @@
+---
+- name: copy {{hosts}}.sh
+  template: dest="/tmp" src={{hosts}}.sh mode=0755
+
+- name: run container
+  shell: /tmp/{{hosts}}.sh

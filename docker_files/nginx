@@ -1,0 +1,6 @@
+FROM alpine:3.5
+RUN apk --update add nginx
+COPY ./applications/nginx/conf/ /etc/nginx/
+COPY ./files/front/dist/ /etc/nginx/html/dist
+EXPOSE 80 443 8000
+CMD ["nginx", "-g", "daemon off;"]

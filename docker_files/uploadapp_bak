@@ -1,0 +1,17 @@
+FROM node:6.10.2-alpine
+RUN apk update \
+ && apk add openssh \
+ && apk add expect \
+ && apk add git \
+ && apk add bash \
+ && echo 'StrictHostKeyChecking no' >> /etc/ssh/ssh_configi \
+ && mkdir -p /home/hadoop/uploader
+
+WORKDIR /home/hadoop/uploader
+
+COPY ./files/uploader/ /home/hadoop/uploader/
+RUN npm install
+
+EXPOSE 5000
+
+CMD ["node", "app.js"]

@@ -1,0 +1,8 @@
+FROM tomcat:9-alpine
+
+COPY ./applications/account/server.xml /usr/local/tomcat/conf/
+COPY ./files/account/target/account.war /usr/local/tomcat/webapps/
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
+
+EXPOSE 8080
+CMD ["catalina.sh", "run"]

@@ -1,0 +1,106 @@
+---
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - registry
+  tags:
+     - registry
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - consul
+  tags:
+     - consul
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - registrator
+  tags:
+     - registrator
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - nginx
+  tags:
+     - nginx
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - campass
+  tags:
+     - campass
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - official
+  tags:
+     - official
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - account
+  tags:
+     - account
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - agent-server
+  tags:
+     - agent-server
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - logstash
+  tags:
+     - logstash
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - task
+  tags:
+     - task
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - uploadapp
+  tags:
+     - uploadapp
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - uploades
+  tags:
+     - uploades
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - uploadhdfs
+  tags:
+     - uploadhdfs
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - uploadpre
+  tags:
+     - uploadpre
+
+- hosts: '{{hosts}}'
+  remote_user: '{{user}}'
+  roles:
+     - docker
+  tags:
+     - docker
+

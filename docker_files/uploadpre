@@ -1,0 +1,3 @@
+FROM 192.168.1.201:5000/uploadapp:1.0.1
+
+CMD ["node", "consumer_pre_resolution_fix.js"]

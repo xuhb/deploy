@@ -1,0 +1,203 @@
+#!/bin/bash
+
+# Code style reffer to
+# https://google.github.io/styleguide/shell.xml
+
+set -e
+
+# 参数设置
+APPLICATION=$1
+VERSION=$2
+
+BASE_PATH=$(cd `dirname -- $0`; cd ../; pwd)
+DIR_DOCKER_FILES=$BASE_PATH/docker_files
+DIR_SCRIPTS=$BASE_PATH/scripts
+
+DOCKER_REGISTRY_HOST=192.168.1.201
+DOCKER_REGISTRY_PORT=5000
+
+CONSUL_HOST=127.0.0.1
+CONSUL_PORT=8500
+
+#######################################
+# 设置版本号
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+check_version() {
+  if [[ -z $VERSION ]]; then
+    echo '请输入版本号!'
+    exit 0
+  fi
+}
+
+#######################################
+# 设置变量
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+set_variables() {
+  IMAGE_NAME=${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/${APPLICATION}
+  CONTAINER_NAME=${DOCKER_REGISTRY_HOST}-${DOCKER_REGISTRY_PORT}-${APPLICATION}
+  IMAGE_VERSION=$VERSION
+}
+
+#######################################
+# 创建镜像
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+build_image() {
+  #查找本地镜像，如果本地不存在对应版本的镜像，那么创建新的镜像文件
+  if [[ $(docker images | grep "${IMAGE_NAME}\s*${IMAGE_VERSION}") == "" ]]; then
+    #创建Docker镜像
+    docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} -f ${DIR_DOCKER_FILES}/${APPLICATION} ${BASE_PATH}/
+
+    #push到远端仓储
+    docker push ${IMAGE_NAME}:${IMAGE_VERSION}
+  fi
+}
+
+#######################################
+# 部署镜像
+#
+# Arguments:
+#   None
+# Returns:
+#   None
+#######################################
+deploy_image() {
+  EXTRA_VARS=$*
+  ansible-playbook -i ${BASE_PATH}/hosts ${BASE_PATH}/deploy.yml --extra-vars "hosts=$APPLICATION user=root IMAGE_NAME=$DOCKER_REGISTRY_HOST:$DOCKER_REGISTRY_PORT/$APPLICATION CONTAINER_NAME=$DOCKER_REGISTRY_HOST-$DOCKER_REGISTRY_PORT-$APPLICATION IMAGE_VERSION=$VERSION $EXTRA_VARS" --tags=$APPLICATION;
+}
+
+#######################################
+# 部署具体应用
+#######################################
+deploy_application(){
+  #是否需要Build镜像
+  NEED_BUILD_IMAGE=true;
+
+  #扩展参数
+  EXTRA_VARS="";
+
+  #检查版本号
+  check_version;
+
+  #设置参数
+  set_variables;
+
+  # 部署Docker Registry镜像
+  if [[ $APPLICATION = "registry" ]]; then
+    NEED_BUILD_IMAGE=false;
+    EXTRA_VARS="DOCKER_REGISTRY_HOST=$DOCKER_REGISTRY_HOST DOCKER_REGISTRY_PORT=$DOCKER_REGISTRY_PORT";
+  fi
+
+  # 部署Docker
+  if [[ $APPLICATION = "docker" ]]; then
+    NEED_BUILD_IMAGE=false;
+    EXTRA_VARS="DOCKER_REGISTRY_HOST=$DOCKER_REGISTRY_HOST DOCKER_REGISTRY_PORT=$DOCKER_REGISTRY_PORT";
+  fi
+
+  # 部署gitlab镜像
+  if [[ $APPLICATION = "gitlab" ]]; then
+    NEED_BUILD_IMAGE=false;
+    EXTRA_VARS="NGINX_PORT=${2:-80} SSH_PORT=${3:-22}";
+  fi
+
+  # 部署Nginx镜像
+  if [[ $APPLICATION = "nginx" ]]; then
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="HTTP_PORT=${3:-80} HTTPS_PORT=${4:-443} PIC_PORT=${5:-8000}";
+    echo $EXTRA_VARS
+  fi
+
+  # 部署Campass镜像
+  if [[ $APPLICATION = "campass" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-8080}";
+  fi
+
+  # 部署定时任务tasks镜像
+  if [[ $APPLICATION = "task" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-8060}";
+  fi
+
+  # 部署Open01官网镜像
+  if [[ $APPLICATION = "official" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION  
+    EXTRA_VARS="PORT=${3:-8090}";
+  fi
+
+  # 部署开户管理account镜像
+  if [[ $APPLICATION = "account" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-8070}";
+  fi
+
+  # 部署流式数据采集客户端下载服务镜像
+  if [[ $APPLICATION = "agent-server" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-3000}";
+  fi
+
+  # 部署离线上传app服务镜像
+  if [[ $APPLICATION = "uploadapp" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-5000}";
+  fi
+
+  # 部署离线上传app服务镜像
+  if [[ $APPLICATION = "uploades" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-5001}";
+  fi
+
+  # 部署离线上传app服务镜像
+  if [[ $APPLICATION = "uploadhdfs" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-5002}";
+  fi
+
+  # 部署离线上传app服务镜像
+  if [[ $APPLICATION = "uploadpre" ]]; then
+    #执行初始化脚本
+    sh $DIR_SCRIPTS/$APPLICATION/init.sh $VERSION
+    EXTRA_VARS="PORT=${3:-5003}";
+  fi
+
+
+  # 部署Registrator镜像
+  if [[ $APPLICATION = "registrator" ]]; then
+    EXTRA_VARS="CONSUL_HOST=$CONSUL_HOST CONSUL_PORT=$CONSUL_PORT";
+  fi
+
+  # 创建镜像
+  if [[ $NEED_BUILD_IMAGE = true ]]; then
+    build_image;
+  fi
+
+  #部署镜像
+  deploy_image $EXTRA_VARS;
+}
+
+#部署应用
+deploy_application $*;

@@ -1,0 +1,5 @@
+{
+    "insecure-registries" : ["{{DOCKER_REGISTRY_HOST}}:{{DOCKER_REGISTRY_PORT}}"]
+}
+
+OPTIONS=--graph="/home/data/docker"

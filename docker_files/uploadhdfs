@@ -1,0 +1,10 @@
+FROM 192.168.1.201:5000/uploadapp:1.0.1
+
+COPY ./applications/uploader/hadoop-2.6.0 /home/hadoop/hadoop-2.6.0
+COPY ./applications/uploader/hive-1.2.1 /home/hadoop/hive-1.2.1
+COPY ./applications/uploader/spark-1.6.3 /home/hadoop/spark-1.6.3
+COPY ./applications/uploader/jdk1.8.0_111 /opt/jdk1.8.0_111
+COPY ./applications/uploader/profile /etc/profile
+COPY ./applications/uploader/hosts /etc/hosts
+
+CMD ["node", "consumer_hdfs_fix.js"]

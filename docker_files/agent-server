@@ -1,0 +1,10 @@
+FROM node:6.10.2-alpine
+
+WORKDIR /app
+
+COPY ./files/agent-server/ /app/
+RUN npm install
+
+EXPOSE 3000
+
+CMD ["node", "app.js"]

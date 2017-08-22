@@ -1,0 +1,24 @@
+---
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
+
+
+- name:  yum-utils
+  yum: pkg=yum-utils state=installed
+
+- name: Setup Docker CE
+  template: dest="/etc/yum.repos.d/" src=docker-ce.repo
+
+- name:  install docker
+  yum: pkg=docker-ce state=installed
+
+- name: mkdir docker dir
+  file: path=/etc/docker state=directory
+
+- name: Setup daemon.json
+  template: dest="/etc/docker/" src=daemon.json
+
+- name: start docker
+  shell: systemctl start docker

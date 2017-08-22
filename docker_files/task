@@ -1,0 +1,9 @@
+FROM tomcat:9-alpine
+RUN apk update
+RUN apk add openssh
+RUN echo 'StrictHostKeyChecking no' >> /etc/ssh/ssh_config
+COPY ./applications/tasks/server.xml /usr/local/tomcat/conf/
+COPY ./files/tasks/target/task.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080
+CMD ["catalina.sh", "run"]

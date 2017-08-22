@@ -1,0 +1,6 @@
+FROM logstash:5
+
+COPY ./applications/logstash/logstash.conf /some/config-dir/
+
+CMD ["-f", "/some/config-dir/logstash.conf"]
+
